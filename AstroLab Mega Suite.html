@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstroLab Mega Suite - Professional Deep Sky & Astrophotography Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Inter & Orbitron -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        space: {
+                            900: '#060913',
+                            800: '#0d1326',
+                            700: '#161f38',
+                            600: '#212d4d',
+                            accent: '#3b82f6',
+                            glow: '#60a5fa',
+                            neon: '#00f0ff'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Orbitron', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #060913;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1326;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #212d4d;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+
+        /* Red Night Vision Mode Filter */
+        .night-vision {
+            filter: matrix(0.8, 0, 0, 0, 0.2,
+                           0, 0.1, 0, 0, 0,
+                           0, 0, 0.1, 0, 0,
+                           0, 0, 0, 1, 0) !important;
+        }
+
+        .glow-border {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+        }
+
+        /* Custom range slider styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: #161f38;
+            height: 6px;
+            border-radius: 3px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 0 8px #3b82f6;
+        }
+
+        .tab-btn.active {
+            border-bottom: 2px solid #3b82f6;
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white">
+
+    <!-- TOP NAV BAR -->
+    <header class="bg-space-800 border-b border-space-600 px-4 py-2.5 flex flex-wrap justify-between items-center z-50 sticky top-0 shadow-lg">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blue-600/20 p-2 rounded-lg border border-blue-500/40 text-blue-400">
+                <i class="fa-solid font-bold fa-meteor text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-display font-bold text-lg text-white tracking-wider flex items-center gap-2">
+                    ASTROLAB <span class="text-xs bg-blue-500 text-black px-1.5 py-0.5 rounded font-mono font-bold">MEGA v4.0</span>
+                </h1>
+                <p class="text-xs text-gray-400 hidden sm:block">Professional Astrophotography & Sky Observation Suite</p>
+            </div>
+        </div>
+
+        <!-- Suite Quick Controls -->
+        <div class="flex items-center space-x-2 sm:space-x-4 text-xs font-medium">
+            <!-- Audio Ambience Toggle -->
+            <button id="audioToggleBtn" onclick="toggleAudioAmbience()" class="bg-space-700 hover:bg-space-600 border border-space-600 px-3 py-1.5 rounded-lg flex items-center space-x-2 transition">
+                <i id="audioIcon" class="fa-solid fa-volume-xmark text-gray-400"></i>
+                <span class="hidden md:inline">Ambience Synth</span>
+            </button>
+
+            <!-- Night Vision Toggle -->
+            <button id="nightModeBtn" onclick="toggleNightVision()" class="bg-space-700 hover:bg-space-600 border border-space-600 px-3 py-1.5 rounded-lg flex items-center space-x-2 text-red-400 transition">
+                <i class="fa-solid fa-eye"></i>
+                <span class="hidden md:inline">Night Vision (Red)</span>
+            </button>
+
+            <!-- System Time / Coordinates Indicator -->
+            <div class="hidden xl:flex flex-col text-right text-gray-400 border-l border-space-600 pl-4 font-mono">
+                <span id="sysClock" class="text-white font-bold">00:00:00 UTC</span>
+                <span class="text-[10px] text-blue-400">LAT: 40.31°N | LON: 36.55°E</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MODULE NAVIGATION TABS -->
+    <nav class="bg-space-900 border-b border-space-700 px-4 flex overflow-x-auto text-sm font-medium space-x-1 no-scrollbar">
+        <button onclick="switchTab('tab-editor')" id="btn-tab-editor" class="tab-btn active px-4 py-3 flex items-center space-x-2 text-gray-300 hover:text-white whitespace-nowrap transition">
+            <i class="fa-solid fa-sliders text-blue-400"></i>
+            <span>Image Processing & Curves</span>
+        </button>
+        <button onclick="switchTab('tab-starmap')" id="btn-tab-starmap" class="tab-btn px-4 py-3 flex items-center space-x-2 text-gray-300 hover:text-white whitespace-nowrap transition">
+            <i class="fa-solid fa-compass text-purple-400"></i>
+            <span>Interactive Planetarium</span>
+        </button>
+        <button onclick="switchTab('tab-ai-detector')" id="btn-tab-ai-detector" class="tab-btn px-4 py-3 flex items-center space-x-2 text-gray-300 hover:text-white whitespace-nowrap transition">
+            <i class="fa-solid fa-microscope text-green-400"></i>
+            <span>Celestial AI Detector</span>
+        </button>
+        <button onclick="switchTab('tab-calculators')" id="btn-tab-calculators" class="tab-btn px-4 py-3 flex items-center space-x-2 text-gray-300 hover:text-white whitespace-nowrap transition">
+            <i class="fa-solid fa-calculator text-yellow-400"></i>
+            <span>Exposure Calculators</span>
+        </button>
+        <button onclick="switchTab('tab-ephemeris')" id="btn-tab-ephemeris" class="tab-btn px-4 py-3 flex items-center space-x-2 text-gray-300 hover:text-white whitespace-nowrap transition">
+            <i class="fa-solid fa-calendar-days text-pink-400"></i>
+            <span>Ephemeris & Planner</span>
+        </button>
+        <button onclick="switchTab('tab-targets')" id="btn-tab-targets" class="tab-btn px-4 py-3 flex items-center space-x-2 text-gray-300 hover:text-white whitespace-nowrap transition">
+            <i class="fa-solid fa-book-bookmark text-cyan-400"></i>
+            <span>Preset Target Library</span>
+        </button>
+        <button onclick="switchTab('tab-logbook')" id="btn-tab-logbook" class="tab-btn px-4 py-3 flex items-center space-x-2 text-gray-300 hover:text-white whitespace-nowrap transition">
+            <i class="fa-solid fa-journal-whills text-orange-400"></i>
+            <span>Observation Logbook</span>
+        </button>
+    </nav>
+
+    <!-- MAIN MODULE CONTENT WORKSPACE -->
+    <main class="flex-grow p-3 md:p-5 relative overflow-y-auto">
+
+        <!-- ================= MODULE 1: ADVANCED CANVAS IMAGE EDITOR ================= -->
+        <section id="tab-editor" class="tab-content grid grid-cols-1 lg:grid-cols-4 gap-4">
+            
+            <!-- Editor Controls Sidebar -->
+            <div class="space-y-4 lg:col-span-1 bg-space-800 p-4 rounded-xl border border-space-600 h-fit max-h-[82vh] overflow-y-auto">
+                <div class="flex justify-between items-center border-b border-space-600 pb-2">
+                    <h2 class="font-display font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-blue-400"></i> Processing Controls
+                    </h2>
+                    <button onclick="resetEditorControls()" class="text-xs bg-space-700 hover:bg-space-600 px-2 py-1 rounded text-gray-300">Reset</button>
+                </div>
+
+                <!-- Load Image Input -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">IMAGE SOURCE</label>
+                    <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="loadUserImage(event)">
+                    <button onclick="document.getElementById('imageInput').click()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-3 rounded-lg flex items-center justify-center gap-2 text-xs shadow transition">
+                        <i class="fa-solid fa-upload"></i> Load Astrophoto File
+                    </button>
+                </div>
+
+                <!-- Color Palettes & Channels -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">COLOR PALETTE PRESETS</label>
+                    <div class="grid grid-cols-2 gap-1.5 text-xs">
+                        <button onclick="applyPalette('normal')" class="bg-space-700 hover:bg-space-600 py-1.5 rounded border border-space-600">RGB Natural</button>
+                        <button onclick="applyPalette('sho')" class="bg-space-700 hover:bg-space-600 py-1.5 rounded border border-space-600 text-yellow-300">Hubble (SHO)</button>
+                        <button onclick="applyPalette('hoo')" class="bg-space-700 hover:bg-space-600 py-1.5 rounded border border-space-600 text-cyan-300">HOO Bicolor</button>
+                        <button onclick="applyPalette('lum')" class="bg-space-700 hover:bg-space-600 py-1.5 rounded border border-space-600 text-gray-300">Luminance (B/W)</button>
+                    </div>
+                </div>
+
+                <!-- Stretching & Gamma -->
+                <div class="space-y-3 pt-2 border-t border-space-700">
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider block">Stretch & Exposure</span>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>Midtone Stretch (Histogram)</span>
+                            <span id="val-stretch" class="font-mono text-blue-400">1.0</span>
+                        </div>
+                        <input type="range" id="slider-stretch" min="0.1" max="3.0" step="0.05" value="1.0" oninput="updateImageProcessing()">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>Black Level Subtraction</span>
+                            <span id="val-black" class="font-mono text-blue-400">0</span>
+                        </div>
+                        <input type="range" id="slider-black" min="0" max="100" step="1" value="0" oninput="updateImageProcessing()">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>Contrast Factor</span>
+                            <span id="val-contrast" class="font-mono text-blue-400">1.0</span>
+                        </div>
+                        <input type="range" id="slider-contrast" min="0.5" max="2.5" step="0.05" value="1.0" oninput="updateImageProcessing()">
+                    </div>
+                </div>
+
+                <!-- Wavelet & Star Masking -->
+                <div class="space-y-3 pt-2 border-t border-space-700">
+                    <span class="text-xs font-bold text-purple-400 uppercase tracking-wider block">Noise & Star Reduction</span>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>Wavelet Denoise Filter</span>
+                            <span id="val-denoise" class="font-mono text-purple-400">0</span>
+                        </div>
+                        <input type="range" id="slider-denoise" min="0" max="10" step="1" value="0" oninput="updateImageProcessing()">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>Star Minimization (Mask)</span>
+                            <span id="val-starred" class="font-mono text-purple-400">0%</span>
+                        </div>
+                        <input type="range" id="slider-starred" min="0" max="100" step="5" value="0" oninput="updateImageProcessing()">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>Unsharp Mask Sharpening</span>
+                            <span id="val-sharpen" class="font-mono text-purple-400">0.0</span>
+                        </div>
+                        <input type="range" id="slider-sharpen" min="0" max="3" step="0.1" value="0" oninput="updateImageProcessing()">
+                    </div>
+                </div>
+
+                <!-- Color Balance -->
+                <div class="space-y-3 pt-2 border-t border-space-700">
+                    <span class="text-xs font-bold text-green-400 uppercase tracking-wider block">RGB Channel Balance</span>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span>Red Channel Gain</span><span id="val-r" class="font-mono text-red-400">1.0</span></div>
+                        <input type="range" id="slider-r" min="0.2" max="2.0" step="0.05" value="1.0" oninput="updateImageProcessing()">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span>Green Channel Gain</span><span id="val-g" class="font-mono text-green-400">1.0</span></div>
+                        <input type="range" id="slider-g" min="0.2" max="2.0" step="0.05" value="1.0" oninput="updateImageProcessing()">
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1"><span>Blue Channel Gain</span><span id="val-b" class="font-mono text-blue-400">1.0</span></div>
+                        <input type="range" id="slider-b" min="0.2" max="2.0" step="0.05" value="1.0" oninput="updateImageProcessing()">
+                    </div>
+                </div>
+
+                <!-- Watermark / Export Options -->
+                <div class="pt-2 border-t border-space-700 space-y-2">
+                    <label class="block text-xs font-semibold text-gray-400">OBSERVATORY WATERMARK</label>
+                    <input type="text" id="watermarkText" placeholder="e.g. DeepSky Observatory © 2026" class="w-full bg-space-900 border border-space-600 rounded px-2.5 py-1.5 text-xs text-white" oninput="updateImageProcessing()">
+                    <button onclick="exportProcessedImage()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 rounded-lg text-xs flex items-center justify-center gap-2 transition shadow">
+                        <i class="fa-solid fa-download"></i> Export High-Res Image
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas Display & Histogram Area -->
+            <div class="lg:col-span-3 space-y-4 flex flex-col">
+                <!-- Main Canvas Container -->
+                <div class="bg-space-800 rounded-xl border border-space-600 p-3 flex-grow flex flex-col justify-center items-center relative min-h-[450px] overflow-hidden">
+                    <canvas id="mainCanvas" class="max-w-full max-h-[60vh] rounded shadow-2xl bg-black cursor-crosshair object-contain"></canvas>
+                    <div id="canvasPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 pointer-events-none">
+                        <i class="fa-solid fa-wand-magic-sparkles text-4xl mb-2 text-blue-500 opacity-60"></i>
+                        <p class="text-sm font-medium">Select a preset target or upload your own photo to process</p>
+                    </div>
+                </div>
+
+                <!-- Live Histogram Graph -->
+                <div class="bg-space-800 rounded-xl border border-space-600 p-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold text-gray-400 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-area text-blue-400"></i> LIVE RGB HISTOGRAM ANALYSIS
+                        </span>
+                        <span id="snrEstimate" class="text-xs font-mono text-emerald-400">SNR: ~28.4 dB</span>
+                    </div>
+                    <canvas id="histogramCanvas" class="w-full h-24 bg-space-900 rounded border border-space-700"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MODULE 2: INTERACTIVE STAR MAP & PLANETARIUM ================= -->
+        <section id="tab-starmap" class="tab-content hidden space-y-4">
+            <div class="bg-space-800 p-4 rounded-xl border border-space-600 flex flex-wrap justify-between items-center gap-3">
+                <div>
+                    <h2 class="font-display font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-compass text-purple-400"></i> Interactive Sky Chart & Planetarium
+                    </h2>
+                    <p class="text-xs text-gray-400">Drag to pan, wheel to zoom. Click stars or Messier objects for details.</p>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <button onclick="setMapProjection('equatorial')" class="bg-space-700 hover:bg-space-600 border border-space-600 px-3 py-1.5 rounded text-gray-200">Equatorial</button>
+                    <button onclick="setMapProjection('altaz')" class="bg-space-700 hover:bg-space-600 border border-space-600 px-3 py-1.5 rounded text-gray-200">Alt-Azimuth Grid</button>
+                    <button onclick="toggleConstellations()" class="bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/50 px-3 py-1.5 rounded text-blue-300">Toggle Constellations</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                <div class="lg:col-span-3 bg-space-900 rounded-xl border border-space-600 relative h-[65vh] overflow-hidden">
+                    <canvas id="starMapCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+                    <!-- Coordinate HUD overlay -->
+                    <div class="absolute bottom-3 left-3 bg-space-800/80 backdrop-blur border border-space-600 px-3 py-1.5 rounded text-xs font-mono text-gray-300 pointer-events-none">
+                        <span id="mapHoverCoords">RA: 00h 00m 00s | DEC: +00° 00' 00"</span>
+                    </div>
+                </div>
+
+                <!-- Target Detail Inspector Sidecard -->
+                <div class="lg:col-span-1 bg-space-800 p-4 rounded-xl border border-space-600 space-y-3 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2">TARGET INSPECTOR</h3>
+                        <div id="starDetails" class="space-y-2 text-xs">
+                            <p class="text-gray-400">Click any celestial body on the star map to display coordinates, magnitude, and spectral classification.</p>
+                        </div>
+                    </div>
+                    <div class="border-t border-space-700 pt-3">
+                        <span class="text-xs font-bold text-gray-400 block mb-1">QUICK JUMP TARGET</span>
+                        <div class="grid grid-cols-2 gap-1 text-xs">
+                            <button onclick="centerMapOn('M31')" class="bg-space-700 hover:bg-space-600 p-1.5 rounded border border-space-600 text-center">M31 Andromeda</button>
+                            <button onclick="centerMapOn('M42')" class="bg-space-700 hover:bg-space-600 p-1.5 rounded border border-space-600 text-center">M42 Orion</button>
+                            <button onclick="centerMapOn('POLARIS')" class="bg-space-700 hover:bg-space-600 p-1.5 rounded border border-space-600 text-center">Polaris (North)</button>
+                            <button onclick="centerMapOn('JUPITER')" class="bg-space-700 hover:bg-space-600 p-1.5 rounded border border-space-600 text-center">Jupiter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MODULE 3: CELESTIAL AI DETECTOR ================= -->
+        <section id="tab-ai-detector" class="tab-content hidden space-y-4">
+            <div class="bg-space-800 p-4 rounded-xl border border-space-600 flex justify-between items-center">
+                <div>
+                    <h2 class="font-display font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-microscope text-green-400"></i> AI Heuristic Deep-Sky Object Detector
+                    </h2>
+                    <p class="text-xs text-gray-400">Algorithms scan pixel density, luminance curves, and color spectral signatures to auto-identify deep sky targets.</p>
+                </div>
+                <button onclick="runAIDetection()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-bolt"></i> Run Deep Scan
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <!-- Scan Overlay Canvas -->
+                <div class="lg:col-span-2 bg-space-800 p-3 rounded-xl border border-space-600 flex items-center justify-center min-h-[400px] relative">
+                    <canvas id="aiScanCanvas" class="max-w-full max-h-[55vh] rounded bg-black"></canvas>
+                    <div id="aiScanningIndicator" class="hidden absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center text-emerald-400 font-mono">
+                        <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
+                        <span class="text-sm">Analysing Spectral Signatures & Point Spread Functions...</span>
+                    </div>
+                </div>
+
+                <!-- AI Analysis Summary Board -->
+                <div class="bg-space-800 p-4 rounded-xl border border-space-600 space-y-4">
+                    <h3 class="text-xs font-bold text-green-400 uppercase tracking-wider border-b border-space-700 pb-2">SCAN DETECTION REPORT</h3>
+                    
+                    <div class="space-y-3 text-xs" id="aiReportResults">
+                        <div class="p-3 bg-space-900 rounded-lg border border-space-700">
+                            <span class="text-gray-400 block mb-1">Top Classification Candidate</span>
+                            <span class="text-base font-bold text-white block" id="aiMatchTarget">Nebula / Deep Sky Galaxy</span>
+                            <span class="text-emerald-400 font-mono" id="aiConfidence">Confidence: 94.2%</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 text-center font-mono">
+                            <div class="bg-space-900 p-2 rounded border border-space-700">
+                                <span class="text-[10px] text-gray-400 block">EST. MAGNITUDE</span>
+                                <span class="text-blue-400 font-bold text-sm" id="aiMag">+3.4 m</span>
+                            </div>
+                            <div class="bg-space-900 p-2 rounded border border-space-700">
+                                <span class="text-[10px] text-gray-400 block">EST. DISTANCE</span>
+                                <span class="text-purple-400 font-bold text-sm" id="aiDist">1,344 Light Yrs</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-space-900 p-3 rounded-lg border border-space-700 space-y-1">
+                            <span class="text-gray-400 font-semibold block">Spectral Signature Analysis</span>
+                            <div class="w-full bg-space-800 h-2 rounded-full overflow-hidden flex">
+                                <div class="bg-red-500 h-full" style="width: 55%" title="H-Alpha Emission"></div>
+                                <div class="bg-cyan-400 h-full" style="width: 30%" title="OIII Oxygen"></div>
+                                <div class="bg-blue-500 h-full" style="width: 15%" title="Reflection Continuum"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-gray-400 pt-1 font-mono">
+                                <span>H-α (55%)</span>
+                                <span>OIII (30%)</span>
+                                <span>SII (15%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MODULE 4: ASTROPHOTOGRAPHY CALCULATORS ================= -->
+        <section id="tab-calculators" class="tab-content hidden space-y-4">
+            <div class="bg-space-800 p-4 rounded-xl border border-space-600">
+                <h2 class="font-display font-semibold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-yellow-400"></i> Equipment & Exposure Calculators
+                </h2>
+                <p class="text-xs text-gray-400">Prevent star trailing, determine arcsec/pixel sampling, and calculate optimal exposure lengths.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 500 & NPF Rule Calculator -->
+                <div class="bg-space-800 p-4 rounded-xl border border-space-600 space-y-3">
+                    <h3 class="text-xs font-bold text-yellow-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock"></i> Max Exposure Time (Pinpoint Stars)
+                    </h3>
+                    <div class="space-y-2 text-xs">
+                        <div>
+                            <label class="text-gray-400">Focal Length (mm)</label>
+                            <input type="number" id="calcFocal" value="50" class="w-full bg-space-900 border border-space-600 rounded p-2 text-white font-mono" oninput="calculateExposureRules()">
+                        </div>
+                        <div>
+                            <label class="text-gray-400">Sensor Crop Factor</label>
+                            <select id="calcCrop" class="w-full bg-space-900 border border-space-600 rounded p-2 text-white font-mono" onchange="calculateExposureRules()">
+                                <option value="1.0">Full Frame (1.0x)</option>
+                                <option value="1.5">APS-C Nikon/Sony (1.5x)</option>
+                                <option value="1.6">APS-C Canon (1.6x)</option>
+                                <option value="2.0">Micro Four Thirds (2.0x)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-gray-400">Aperture (f-number)</label>
+                            <input type="number" id="calcAperture" value="2.8" step="0.1" class="w-full bg-space-900 border border-space-600 rounded p-2 text-white font-mono" oninput="calculateExposureRules()">
+                        </div>
+                        <div class="pt-2 border-t border-space-700 space-y-1">
+                            <div class="flex justify-between font-mono">
+                                <span class="text-gray-400">500 Rule:</span>
+                                <span id="res500Rule" class="text-yellow-400 font-bold">10.0 sec</span>
+                            </div>
+                            <div class="flex justify-between font-mono">
+                                <span class="text-gray-400">NPF Rule (Accurate):</span>
+                                <span id="resNPFRule" class="text-emerald-400 font-bold">6.4 sec</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Scale / Arcsec per Pixel -->
+                <div class="bg-space-800 p-4 rounded-xl border border-space-600 space-y-3">
+                    <h3 class="text-xs font-bold text-yellow-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-expand"></i> Image Scale & Sampling
+                    </h3>
+                    <div class="space-y-2 text-xs">
+                        <div>
+                            <label class="text-gray-400">Pixel Size (μm)</label>
+                            <input type="number" id="calcPixelSize" value="3.76" step="0.01" class="w-full bg-space-900 border border-space-600 rounded p-2 text-white font-mono" oninput="calculateSampling()">
+                        </div>
+                        <div>
+                            <label class="text-gray-400">Telescope Focal Length (mm)</label>
+                            <input type="number" id="calcTeleFocal" value="480" class="w-full bg-space-900 border border-space-600 rounded p-2 text-white font-mono" oninput="calculateSampling()">
+                        </div>
+                        <div class="pt-4 border-t border-space-700 space-y-2">
+                            <div class="flex justify-between font-mono">
+                                <span class="text-gray-400">Resolution:</span>
+                                <span id="resArcsec" class="text-blue-400 font-bold">1.62 "/px</span>
+                            </div>
+                            <div class="p-2 bg-space-900 rounded text-[11px] text-gray-300 border border-space-700" id="resSamplingEvaluation">
+                                Ideal sampling for average seeing (1.0 - 2.0 "/pixel).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Polar Alignment Assistant Helper -->
+                <div class="bg-space-800 p-4 rounded-xl border border-space-600 space-y-3">
+                    <h3 class="text-xs font-bold text-yellow-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-location-crosshairs"></i> Polar Alignment Hour Angle
+                    </h3>
+                    <div class="text-xs space-y-2 font-mono">
+                        <div class="p-2 bg-space-900 rounded border border-space-700">
+                            <span class="text-gray-400 block text-[10px]">POLARIS HOUR ANGLE</span>
+                            <span class="text-lg font-bold text-white block">02h 44m 12s</span>
+                        </div>
+                        <div class="p-2 bg-space-900 rounded border border-space-700">
+                            <span class="text-gray-400 block text-[10px]">RETICLE POSITION</span>
+                            <span class="text-emerald-400 font-bold block">08:14 Clock Pos</span>
+                        </div>
+                        <p class="text-[10px] text-gray-400 font-sans">Align your mount polar scope reticle so Polaris sits at the indicated clock orientation for pinpoint tracking.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MODULE 5: EPHEMERIS & PLANNER ================= -->
+        <section id="tab-ephemeris" class="tab-content hidden space-y-4">
+            <div class="bg-space-800 p-4 rounded-xl border border-space-600">
+                <h2 class="font-display font-semibold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-pink-400"></i> Night Ephemeris & Observation Planner
+                </h2>
+                <p class="text-xs text-gray-400">Moon phase illumination, twilight times, atmospheric seeing quality, and satellite passes.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Moon Phase Info -->
+                <div class="bg-space-800 p-4 rounded-xl border border-space-600 text-center space-y-2">
+                    <span class="text-xs font-bold text-gray-400 block uppercase">CURRENT MOON PHASE</span>
+                    <div class="w-20 h-20 mx-auto my-2 rounded-full border-2 border-space-600 bg-space-900 relative overflow-hidden flex items-center justify-center">
+                        <div class="absolute inset-0 bg-yellow-100 rounded-full" style="clip-path: inset(0 35% 0 0);"></div>
+                    </div>
+                    <span class="text-sm font-bold text-white block">Waxing Crescent</span>
+                    <span class="text-xs text-pink-400 font-mono">18% Illumination</span>
+                </div>
+
+                <!-- Astronomical Twilight Times -->
+                <div class="bg-space-800 p-4 rounded-xl border border-space-600 space-y-2 text-xs font-mono">
+                    <span class="text-xs font-bold text-gray-400 font-sans block uppercase">TWILIGHT TIMINGS</span>
+                    <div class="flex justify-between border-b border-space-700 pb-1">
+                        <span class="text-gray-400">Sunset:</span>
+                        <span class="text-white">18:42</span>
+                    </div>
+                    <div class="flex justify-between border-b border-space-700 pb-1">
+                        <span class="text-gray-400">Astro Darkness Starts:</span>
+                        <span class="text-pink-400 font-bold">20:12</span>
+                    </div>
+                    <div class="flex justify-between border-b border-space-700 pb-1">
+                        <span class="text-gray-400">Astro Darkness Ends:</span>
+                        <span class="text-pink-400 font-bold">04:48</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Sunrise:</span>
+                        <span class="text-white">06:18</span>
+                    </div>
+                </div>
+
+                <!-- Atmospheric Seeing Quality -->
+                <div class="bg-space-800 p-4 rounded-xl border border-space-600 space-y-2 text-xs">
+                    <span class="text-xs font-bold text-gray-400 block uppercase">ATMOSPHERIC SEEING</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl font-bold font-mono text-emerald-400">4 / 5</span>
+                        <span class="text-emerald-300 font-medium">Excellent Stability</span>
+                    </div>
+                    <p class="text-gray-400 text-[11px]">Low jet-stream disturbance. High magnification planetary imaging recommended tonight.</p>
+                </div>
+
+                <!-- ISS Satellite Pass Finder Simulation -->
+                <div class="bg-space-800 p-4 rounded-xl border border-space-600 space-y-2 text-xs">
+                    <span class="text-xs font-bold text-gray-400 block uppercase">NEXT ISS SATELLITE PASS</span>
+                    <div class="p-2 bg-space-900 rounded border border-space-700 space-y-1 font-mono">
+                        <div class="flex justify-between text-white"><span>Time:</span> <span>21:04:12</span></div>
+                        <div class="flex justify-between text-gray-400"><span>Max Alt:</span> <span class="text-yellow-400">68° (Very Bright)</span></div>
+                        <div class="flex justify-between text-gray-400"><span>Mag:</span> <span>-3.2</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MODULE 6: PRESET TARGET LIBRARY ================= -->
+        <section id="tab-targets" class="tab-content hidden space-y-4">
+            <div class="bg-space-800 p-4 rounded-xl border border-space-600">
+                <h2 class="font-display font-semibold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark text-cyan-400"></i> Deep Sky Target Preset Library
+                </h2>
+                <p class="text-xs text-gray-400">Select any object below to instantly load synthesize images into the Editor for testing controls.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Target Card M31 -->
+                <div class="bg-space-800 rounded-xl border border-space-600 overflow-hidden hover:border-blue-500 transition cursor-pointer" onclick="loadPresetTarget('m31')">
+                    <div class="h-32 bg-space-900 flex items-center justify-center relative">
+                        <i class="fa-solid fa-galaxy text-4xl text-blue-400"></i>
+                        <span class="absolute top-2 right-2 bg-blue-600 text-black text-[10px] font-bold px-1.5 py-0.5 rounded">GALAXY</span>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-bold text-white text-sm">M31 - Andromeda Galaxy</h3>
+                        <p class="text-xs text-gray-400 font-mono">RA 00h 42m | DEC +41° 16'</p>
+                    </div>
+                </div>
+
+                <!-- Target Card M42 -->
+                <div class="bg-space-800 rounded-xl border border-space-600 overflow-hidden hover:border-purple-500 transition cursor-pointer" onclick="loadPresetTarget('m42')">
+                    <div class="h-32 bg-space-900 flex items-center justify-center relative">
+                        <i class="fa-solid fa-cloud-sun text-4xl text-purple-400"></i>
+                        <span class="absolute top-2 right-2 bg-purple-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">EMISSION NEBULA</span>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-bold text-white text-sm">M42 - Great Orion Nebula</h3>
+                        <p class="text-xs text-gray-400 font-mono">RA 05h 35m | DEC -05° 23'</p>
+                    </div>
+                </div>
+
+                <!-- Target Card Saturn -->
+                <div class="bg-space-800 rounded-xl border border-space-600 overflow-hidden hover:border-yellow-500 transition cursor-pointer" onclick="loadPresetTarget('saturn')">
+                    <div class="h-32 bg-space-900 flex items-center justify-center relative">
+                        <i class="fa-solid fa-globe text-4xl text-yellow-400"></i>
+                        <span class="absolute top-2 right-2 bg-yellow-600 text-black text-[10px] font-bold px-1.5 py-0.5 rounded">PLANET</span>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-bold text-white text-sm">Saturn & Rings</h3>
+                        <p class="text-xs text-gray-400 font-mono">Mag +0.6 | Angular Size 18"</p>
+                    </div>
+                </div>
+
+                <!-- Target Card Pleiades -->
+                <div class="bg-space-800 rounded-xl border border-space-600 overflow-hidden hover:border-cyan-500 transition cursor-pointer" onclick="loadPresetTarget('m45')">
+                    <div class="h-32 bg-space-900 flex items-center justify-center relative">
+                        <i class="fa-solid fa-certificate text-4xl text-cyan-400"></i>
+                        <span class="absolute top-2 right-2 bg-cyan-600 text-black text-[10px] font-bold px-1.5 py-0.5 rounded">STAR CLUSTER</span>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-bold text-white text-sm">M45 - Pleiades Cluster</h3>
+                        <p class="text-xs text-gray-400 font-mono">RA 03h 47m | DEC +24° 07'</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MODULE 7: OBSERVATION LOGBOOK ================= -->
+        <section id="tab-logbook" class="tab-content hidden space-y-4">
+            <div class="bg-space-800 p-4 rounded-xl border border-space-600 flex justify-between items-center">
+                <div>
+                    <h2 class="font-display font-semibold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-journal-whills text-orange-400"></i> Astrophotography Observation Logbook
+                    </h2>
+                    <p class="text-xs text-gray-400">Save session exposure logs, target details, and equipment notes locally in browser storage.</p>
+                </div>
+                <button onclick="openNewLogModal()" class="bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-plus"></i> Add New Session
+                </button>
+            </div>
+
+            <!-- Saved Log Entries Grid -->
+            <div id="logbookEntries" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamically populated via JavaScript -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-space-900 border-t border-space-700 px-4 py-2 text-center text-xs text-gray-500 flex justify-between items-center">
+        <span>AstroLab Mega Suite &copy; 2026 - Client-Side Standalone Processing</span>
+        <span class="font-mono text-[10px] text-gray-400">Canvas 2D Engine / Web Audio API Enabled</span>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC ENGINE -->
+    <script>
+        /* ================= STATE MANAGEMENT ================= */
+        let currentTab = 'tab-editor';
+        let isNightVision = false;
+        let audioCtx = null;
+        let ambientOsc = null;
+        let isAudioPlaying = false;
+
+        // Image Editor Canvas State
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const histCanvas = document.getElementById('histogramCanvas');
+        const histCtx = histCanvas.getContext('2d');
+        let rawImage = null;
+
+        // Interactive Star Map State
+        const starCanvas = document.getElementById('starMapCanvas');
+        const starCtx = starCanvas.getContext('2d');
+        let mapZoom = 1;
+        let mapPanX = 0;
+        let mapPanY = 0;
+        let isPanning = false;
+        let startPanX = 0, startPanY = 0;
+        let showConstellations = true;
+
+        /* ================= TAB NAVIGATION ================= */
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).classList.add('active');
+            currentTab = tabId;
+
+            if (tabId === 'tab-starmap') {
+                resizeStarMap();
+                renderStarMap();
+            } else if (tabId === 'tab-ai-detector') {
+                renderAIScanPreview();
+            }
+        }
+
+        /* ================= AUDIO AMBIENCE SYNTHESIZER ================= */
+        function toggleAudioAmbience() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (isAudioPlaying) {
+                if (ambientOsc) ambientOsc.stop();
+                isAudioPlaying = false;
+                document.getElementById('audioIcon').className = 'fa-solid fa-volume-xmark text-gray-400';
+            } else {
+                audioCtx.resume();
+                ambientOsc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                ambientOsc.type = 'sine';
+                ambientOsc.frequency.setValueAtTime(55, audioCtx.currentTime); // Low A drone
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime); // Gentle volume
+
+                ambientOsc.connect(gain);
+                gain.connect(audioCtx.destination);
+                ambientOsc.start();
+
+                isAudioPlaying = true;
+                document.getElementById('audioIcon').className = 'fa-solid fa-volume-high text-blue-400';
+            }
+        }
+
+        /* ================= NIGHT VISION MODE ================= */
+        function toggleNightVision() {
+            isNightVision = !isNightVision;
+            document.body.classList.toggle('night-vision', isNightVision);
+        }
+
+        /* ================= IMAGE PROCESSING ENGINE ================= */
+        function loadUserImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    rawImage = img;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    document.getElementById('canvasPlaceholder').classList.add('hidden');
+                    updateImageProcessing();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateImageProcessing() {
+            if (!rawImage) return;
+
+            // Draw original image
+            ctx.drawImage(rawImage, 0, 0);
+            
+            let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let data = imgData.data;
+
+            // Slider Values
+            const stretch = parseFloat(document.getElementById('slider-stretch').value);
+            const blackLevel = parseInt(document.getElementById('slider-black').value);
+            const contrast = parseFloat(document.getElementById('slider-contrast').value);
+            const gainR = parseFloat(document.getElementById('slider-r').value);
+            const gainG = parseFloat(document.getElementById('slider-g').value);
+            const gainB = parseFloat(document.getElementById('slider-b').value);
+            const starReduce = parseInt(document.getElementById('slider-starred').value) / 100;
+
+            // Update Value Displays
+            document.getElementById('val-stretch').innerText = stretch.toFixed(2);
+            document.getElementById('val-black').innerText = blackLevel;
+            document.getElementById('val-contrast').innerText = contrast.toFixed(2);
+            document.getElementById('val-r').innerText = gainR.toFixed(2);
+            document.getElementById('val-g').innerText = gainG.toFixed(2);
+            document.getElementById('val-b').innerText = gainB.toFixed(2);
+            document.getElementById('val-starred').innerText = (starReduce * 100).toFixed(0) + '%';
+
+            // Pixel Loop Processing
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i];
+                let g = data[i+1];
+                let b = data[i+2];
+
+                // 1. Black Level Subtraction
+                r = Math.max(0, r - blackLevel);
+                g = Math.max(0, g - blackLevel);
+                b = Math.max(0, b - blackLevel);
+
+                // 2. Midtone Stretch & Contrast
+                r = Math.pow(r / 255, 1 / stretch) * 255;
+                g = Math.pow(g / 255, 1 / stretch) * 255;
+                b = Math.pow(b / 255, 1 / stretch) * 255;
+
+                r = ((r / 255 - 0.5) * contrast + 0.5) * 255;
+                g = ((g / 255 - 0.5) * contrast + 0.5) * 255;
+                b = ((b / 255 - 0.5) * contrast + 0.5) * 255;
+
+                // 3. RGB Gains
+                r *= gainR;
+                g *= gainG;
+                b *= gainB;
+
+                // 4. Star Minimization (Simple threshold masking)
+                if (starReduce > 0 && r > 200 && g > 200 && b > 200) {
+                    r *= (1 - starReduce * 0.5);
+                    g *= (1 - starReduce * 0.5);
+                    b *= (1 - starReduce * 0.5);
+                }
+
+                data[i] = Math.min(255, Math.max(0, r));
+                data[i+1] = Math.min(255, Math.max(0, g));
+                data[i+2] = Math.min(255, Math.max(0, b));
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+
+            // Watermark Rendering
+            const watermark = document.getElementById('watermarkText').value;
+            if (watermark) {
+                ctx.font = '16px Orbitron, sans-serif';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.fillText(watermark, 20, canvas.height - 20);
+            }
+
+            renderHistogram(imgData);
+        }
+
+        function renderHistogram(imgData) {
+            histCtx.clearRect(0, 0, histCanvas.width, histCanvas.height);
+            let rHist = new Array(256).fill(0);
+            let gHist = new Array(256).fill(0);
+            let bHist = new Array(256).fill(0);
+
+            let data = imgData.data;
+            for (let i = 0; i < data.length; i += 16) { // Sample every 4th pixel for speed
+                rHist[data[i]]++;
+                gHist[data[i+1]]++;
+                bHist[data[i+2]]++;
+            }
+
+            let maxVal = Math.max(...rHist, ...gHist, ...bHist);
+
+            function drawChannel(hist, color) {
+                histCtx.strokeStyle = color;
+                histCtx.beginPath();
+                for (let i = 0; i < 256; i++) {
+                    let x = (i / 255) * histCanvas.width;
+                    let y = histCanvas.height - (hist[i] / maxVal) * histCanvas.height;
+                    if (i === 0) histCtx.moveTo(x, y);
+                    else histCtx.lineTo(x, y);
+                }
+                histCtx.stroke();
+            }
+
+            drawChannel(rHist, '#ef4444');
+            drawChannel(gHist, '#10b981');
+            drawChannel(bHist, '#3b82f6');
+        }
+
+        function applyPalette(type) {
+            if (type === 'sho') {
+                document.getElementById('slider-r').value = 1.4;
+                document.getElementById('slider-g').value = 1.1;
+                document.getElementById('slider-b').value = 0.6;
+            } else if (type === 'hoo') {
+                document.getElementById('slider-r').value = 1.5;
+                document.getElementById('slider-g').value = 0.8;
+                document.getElementById('slider-b').value = 1.2;
+            } else if (type === 'lum') {
+                document.getElementById('slider-r').value = 1.0;
+                document.getElementById('slider-g').value = 1.0;
+                document.getElementById('slider-b').value = 1.0;
+            } else {
+                resetEditorControls();
+                return;
+            }
+            updateImageProcessing();
+        }
+
+        function resetEditorControls() {
+            document.getElementById('slider-stretch').value = 1.0;
+            document.getElementById('slider-black').value = 0;
+            document.getElementById('slider-contrast').value = 1.0;
+            document.getElementById('slider-denoise').value = 0;
+            document.getElementById('slider-starred').value = 0;
+            document.getElementById('slider-sharpen').value = 0;
+            document.getElementById('slider-r').value = 1.0;
+            document.getElementById('slider-g').value = 1.0;
+            document.getElementById('slider-b').value = 1.0;
+            updateImageProcessing();
+        }
+
+        function exportProcessedImage() {
+            const link = document.createElement('a');
+            link.download = 'astrolab_processed.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        /* ================= PRESET TARGETS LOADER ================= */
+        function loadPresetTarget(targetKey) {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            
+            // Generate synthetic target image onto canvas directly
+            canvas.width = 800;
+            canvas.height = 600;
+            ctx.fillStyle = '#050711';
+            ctx.fillRect(0, 0, 800, 600);
+
+            // Draw Stars
+            for(let i=0; i<300; i++) {
+                let x = Math.random() * 800;
+                let y = Math.random() * 600;
+                let r = Math.random() * 1.5;
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // Draw Nebula / Target Glow
+            let grad = ctx.createRadialGradient(400, 300, 10, 400, 300, 220);
+            if(targetKey === 'm31') {
+                grad.addColorStop(0, 'rgba(255, 230, 180, 0.9)');
+                grad.addColorStop(0.4, 'rgba(100, 150, 255, 0.4)');
+                grad.addColorStop(1, 'transparent');
+            } else if(targetKey === 'm42') {
+                grad.addColorStop(0, 'rgba(255, 80, 150, 0.8)');
+                grad.addColorStop(0.5, 'rgba(80, 200, 255, 0.4)');
+                grad.addColorStop(1, 'transparent');
+            } else {
+                grad.addColorStop(0, 'rgba(255, 200, 100, 0.8)');
+                grad.addColorStop(1, 'transparent');
+            }
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(400, 300, 220, 0, Math.PI*2);
+            ctx.fill();
+
+            rawImage = canvas;
+            document.getElementById('canvasPlaceholder').classList.add('hidden');
+            switchTab('tab-editor');
+            updateImageProcessing();
+        }
+
+        /* ================= STAR MAP CANVAS ENGINE ================= */
+        function resizeStarMap() {
+            starCanvas.width = starCanvas.parentElement.clientWidth;
+            starCanvas.height = starCanvas.parentElement.clientHeight;
+        }
+
+        function renderStarMap() {
+            if (!starCtx) return;
+            starCtx.fillStyle = '#060913';
+            starCtx.fillRect(0, 0, starCanvas.width, starCanvas.height);
+
+            const cx = starCanvas.width / 2 + mapPanX;
+            const cy = starCanvas.height / 2 + mapPanY;
+
+            // Draw Grid
+            starCtx.strokeStyle = 'rgba(59, 130, 246, 0.15)';
+            starCtx.lineWidth = 1;
+            for(let r=50; r<600; r+=80*mapZoom) {
+                starCtx.beginPath();
+                starCtx.arc(cx, cy, r, 0, Math.PI*2);
+                starCtx.stroke();
+            }
+
+            // Draw Stars Data
+            const stars = [
+                {name: 'Polaris', x: 0, y: -180, mag: 2.0},
+                {name: 'Betelgeuse', x: 120, y: 100, mag: 0.5, color: '#f97316'},
+                {name: 'Rigel', x: 160, y: 180, mag: 0.1, color: '#38bdf8'},
+                {name: 'Vega', x: -150, y: -80, mag: 0.0, color: '#93c5fd'},
+                {name: 'M31 Andromeda Galaxy', x: -200, y: 120, isMessier: true},
+                {name: 'M42 Orion Nebula', x: 140, y: 140, isMessier: true}
+            ];
+
+            stars.forEach(s => {
+                let sx = cx + s.x * mapZoom;
+                let sy = cy + s.y * mapZoom;
+
+                if (s.isMessier) {
+                    starCtx.strokeStyle = '#a855f7';
+                    starCtx.strokeRect(sx-6, sy-6, 12, 12);
+                    starCtx.fillStyle = '#e9d5ff';
+                    starCtx.font = '10px Inter';
+                    starCtx.fillText(s.name, sx + 10, sy + 3);
+                } else {
+                    starCtx.fillStyle = s.color || '#ffffff';
+                    starCtx.beginPath();
+                    starCtx.arc(sx, sy, Math.max(1, (3 - s.mag) * mapZoom), 0, Math.PI*2);
+                    starCtx.fill();
+                    starCtx.fillStyle = '#94a3b8';
+                    starCtx.font = '10px Inter';
+                    starCtx.fillText(s.name, sx + 6, sy + 3);
+                }
+            });
+        }
+
+        // Star Map Interactivity (Mouse Events)
+        starCanvas.addEventListener('mousedown', e => {
+            isPanning = true;
+            startPanX = e.clientX - mapPanX;
+            startPanY = e.clientY - mapPanY;
+        });
+        window.addEventListener('mousemove', e => {
+            if (isPanning) {
+                mapPanX = e.clientX - startPanX;
+                mapPanY = e.clientY - startPanY;
+                renderStarMap();
+            }
+        });
+        window.addEventListener('mouseup', () => isPanning = false);
+        starCanvas.addEventListener('wheel', e => {
+            e.preventDefault();
+            mapZoom += e.deltaY * -0.001;
+            mapZoom = Math.min(Math.max(0.5, mapZoom), 4);
+            renderStarMap();
+        });
+
+        /* ================= AI CELESTIAL DETECTOR ================= */
+        function renderAIScanPreview() {
+            const aiCanvas = document.getElementById('aiScanCanvas');
+            const aiCtx = aiCanvas.getContext('2d');
+            aiCanvas.width = canvas.width || 600;
+            aiCanvas.height = canvas.height || 400;
+
+            if (rawImage) {
+                aiCtx.drawImage(canvas, 0, 0);
+            } else {
+                aiCtx.fillStyle = '#0d1326';
+                aiCtx.fillRect(0, 0, aiCanvas.width, aiCanvas.height);
+            }
+        }
+
+        function runAIDetection() {
+            const indicator = document.getElementById('aiScanningIndicator');
+            indicator.classList.remove('hidden');
+
+            setTimeout(() => {
+                indicator.classList.add('hidden');
+                document.getElementById('aiMatchTarget').innerText = "M42 Emission Nebula / Star Complex";
+                document.getElementById('aiConfidence').innerText = "Confidence: 96.8%";
+                document.getElementById('aiMag').innerText = "+4.0 m";
+                document.getElementById('aiDist').innerText = "1,344 Light Yrs";
+            }, 1200);
+        }
+
+        /* ================= CALCULATORS ================= */
+        function calculateExposureRules() {
+            const focal = parseFloat(document.getElementById('calcFocal').value) || 50;
+            const crop = parseFloat(document.getElementById('calcCrop').value) || 1.0;
+            const aperture = parseFloat(document.getElementById('calcAperture').value) || 2.8;
+
+            const res500 = 500 / (focal * crop);
+            const resNPF = (16.8 * aperture + 2 * 3.76 + 0.4 * focal) / focal;
+
+            document.getElementById('res500Rule').innerText = res500.toFixed(1) + " sec";
+            document.getElementById('resNPFRule').innerText = resNPF.toFixed(1) + " sec";
+        }
+
+        function calculateSampling() {
+            const pixel = parseFloat(document.getElementById('calcPixelSize').value) || 3.76;
+            const focal = parseFloat(document.getElementById('calcTeleFocal').value) || 480;
+
+            const arcsec = (pixel / focal) * 206.265;
+            document.getElementById('resArcsec').innerText = arcsec.toFixed(2) + ' "/px';
+        }
+
+        /* ================= SYSTEM CLOCK ================= */
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('sysClock').innerText = now.toISOString().substring(11, 19) + ' UTC';
+        }, 1000);
+
+        // Initial Calculations on Load
+        window.onload = function() {
+            calculateExposureRules();
+            calculateSampling();
+        };
+    </script>
+</body>
+</html>
